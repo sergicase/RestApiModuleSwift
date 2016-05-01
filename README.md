@@ -72,7 +72,7 @@ If your API use headers you can put it on the init.
 
 ### Nexts Steps
 
-You the nexts steps that I'll implement will be cache the responses using Core Data, that could be good if the user 
+The nexts steps that I'll implement will be cache the responses using Core Data, that could be good if the user 
 lost the conection or just they are in area that the internet isn't available, for load esential data from the last
 Api Call
 
