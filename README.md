@@ -62,7 +62,7 @@ If your API use headers you can put it on the init.
 
 ```sh
           
-        apimodule.delete("users/1",params: params){
+        apimodule.delete("users/1"){
             response in
             print(response)
         
