@@ -14,96 +14,96 @@ class ApiRequestModule{
     
     var url = NSURL();
     var request = NSMutableURLRequest();
-
+    
     
     init (domain: String,headers: [String:String])
     {
         self.domain = domain
         self.headers = headers
-     }
+    }
     
-    func get(resource: String, completion: (response: String) -> ())
+    func get(resource: String, completion: @escaping (_ response: String) -> ())
     {
-
-        self.setUrl(resource)
-        self.initHeaders(self.headers)
-
-        request.HTTPMethod = "GET"
-        trytask(){ response in completion(response:response)}
+        
+        self.setUrl(resource: resource)
+        self.initHeaders(headers: self.headers)
+        
+        request.httpMethod = "GET"
+        trytask(){ response in completion(response)}
         
     }
     
     
-    func post(resource: String,params: [String:AnyObject], completion: (response: String) -> ())
+    func post(resource: String,params: [String:AnyObject], completion: @escaping (_ response: String) -> ())
     {
         
         
-        if(NSJSONSerialization.isValidJSONObject(params))
+        if(JSONSerialization.isValidJSONObject(params))
         {
-            self.setUrl(resource)
-            self.initHeaders(self.headers)
+            self.setUrl(resource: resource)
+            self.initHeaders(headers: self.headers)
             
-            request.HTTPMethod = "POST"
+            request.httpMethod = "POST"
             do {
-                let jsonTodo = try NSJSONSerialization.dataWithJSONObject(params, options: [])
-                request.HTTPBody = jsonTodo
-
-            } catch {
-                print("Error: Couldn't create the Json")
-                return
-            }
-            trytask(){ response in completion(response:response)}
-        } else {
-            print("Invalid Json Object")
-        }
-        
-    }
-    
-    func put(resource: String,params: [String:AnyObject], completion: (response: String) -> ())
-    {
-        
-        if(NSJSONSerialization.isValidJSONObject(params))
-        {
-            self.setUrl(resource)
-            self.initHeaders(self.headers)
-
-            request.HTTPMethod = "PUT"
-            do {
-                let json = try NSJSONSerialization.dataWithJSONObject(params, options: [])
-                request.HTTPBody = json
+                let jsonTodo = try JSONSerialization.data(withJSONObject: params, options: [])
+                request.httpBody = jsonTodo
                 
             } catch {
                 print("Error: Couldn't create the Json")
                 return
             }
-            trytask(){ response in completion(response:response)}
+            trytask(){ response in completion(response)}
         } else {
             print("Invalid Json Object")
         }
         
     }
     
-    func delete(resource: String, completion: (response: String) -> ())
+    func put(resource: String,params: [String:AnyObject], completion: @escaping (_ response: String) -> ())
     {
-            self.setUrl(resource)
-            self.initHeaders(self.headers)
-
-            request.HTTPMethod = "DELETE"
-            trytask(){ response in completion(response:response)}
+        
+        if(JSONSerialization.isValidJSONObject(params))
+        {
+            self.setUrl(resource: resource)
+            self.initHeaders(headers: self.headers)
+            
+            request.httpMethod = "PUT"
+            do {
+                let json = try JSONSerialization.data(withJSONObject: params, options: [])
+                request.httpBody = json
+                
+            } catch {
+                print("Error: Couldn't create the Json")
+                return
+            }
+            trytask(){ response in completion(response)}
+        } else {
+            print("Invalid Json Object")
+        }
+        
+    }
+    
+    func delete(resource: String, completion: @escaping (_ response: String) -> ())
+    {
+        self.setUrl(resource: resource)
+        self.initHeaders(headers: self.headers)
+        
+        request.httpMethod = "DELETE"
+        trytask(){ response in completion(response)}
         
         
     }
-
+    
     func setHeaders(headers: [String:String])
     {
         self.headers = headers
-
+        
     }
     
     
     private func setUrl(resource: String) -> Void
     {
-        self.request = NSMutableURLRequest(URL: NSURL(string: self.domain + resource)!)
+        self.request = NSMutableURLRequest(url: NSURL(string: self.domain + resource)! as URL)
         
     }
     
@@ -116,17 +116,16 @@ class ApiRequestModule{
         } else {
             return false
         }
-
+        
     }
     
-    private func trytask(completion:(response:String)->())    {
-        let task = NSURLSession.sharedSession().dataTaskWithRequest(request) {
+    private func trytask(completion:@escaping (_ response:String)->())    {
+        let task = URLSession.shared.dataTask(with: request as URLRequest) {
             data, response, error in
             if let data = data,
-                jsonString = String(data: data, encoding: NSUTF8StringEncoding)
-                where error == nil {
+                let jsonString = String(data: data, encoding: String.Encoding.utf8), error == nil {
                 jsonString
-                completion(response: jsonString)
+                completion(jsonString)
             } else {
                 print("error=\(error!.localizedDescription)")
                 
@@ -134,7 +133,7 @@ class ApiRequestModule{
         }
         task.resume()
     }
-
+    
     private func initHeaders(headers: [String: String]){
         
         for header in headers {
